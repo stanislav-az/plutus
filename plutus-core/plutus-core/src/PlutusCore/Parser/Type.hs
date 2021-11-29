@@ -33,6 +33,12 @@ ifixType = inParens $ TyIFix <$> wordPos "ifix" <*> pType <*> pType
 builtinType :: Parser PType
 builtinType = inParens $ TyBuiltin <$> wordPos "con" <*> defaultUniType
 
+prodType :: Parser PType
+prodType = inParens $ TyProd <$> wordPos "prod" <*> Text.Megaparsec.many pType
+
+sumType :: Parser PType
+sumType = inParens $ TySum <$> wordPos "sum" <*> Text.Megaparsec.many pType
+
 appType :: Parser PType
 appType = inBrackets $ do
     pos  <- getSourcePos
@@ -56,6 +62,8 @@ pType = choice $ map try
     , lamType
     , appType
     , varType
+    , prodType
+    , sumType
     ]
 
 defaultUniType :: Parser (SomeTypeIn DefaultUni)

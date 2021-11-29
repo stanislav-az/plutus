@@ -45,6 +45,8 @@ fvTerm = \case
     TyInst _ t _ ->    fvTerm t
     Unwrap _ t ->      fvTerm t
     IWrap _ _ _ t ->   fvTerm t
+    Constr _ _ _ es ->   foldMap fvTerm es
+    Case _ _ arg cs ->  fvTerm arg <> foldMap fvTerm cs
     Constant{}       -> mempty
     Builtin{}        -> mempty
     Error{}          -> mempty
@@ -67,6 +69,8 @@ ftvTerm = \case
     Unwrap _ t        -> ftvTerm t
     IWrap _ pat arg t -> ftvTy pat <> ftvTy arg <> ftvTerm t
     Error _ ty        -> ftvTy ty
+    Constr _ ty _ es -> ftvTy ty <> foldMap ftvTerm es
+    Case _ ty arg cs -> ftvTy ty <> ftvTerm arg <> foldMap ftvTerm cs
     Var{}               -> mempty
     Constant{}          -> mempty
     Builtin{}           -> mempty

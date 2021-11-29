@@ -194,6 +194,8 @@ mkError evalError (Just t) =
        UPLC.Delay _ t     -> findBuiltin t
        -- Future proofing for eta-expanded builtins
        UPLC.LamAbs _ _ t  -> findBuiltin t
+       UPLC.Case {}       -> Nothing
+       UPLC.Constr {}     -> Nothing
        UPLC.Var _ _       -> Nothing
        UPLC.Constant _ _  -> Nothing
        UPLC.Error _       -> Nothing

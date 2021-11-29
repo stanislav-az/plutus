@@ -98,10 +98,13 @@ data TypeError term uni fun ann
 
 -- Make a custom data type and wrap @ParseErrorBundle@ in it so I can use @makeClassyPrisms@
 -- on @ParseErrorBundle@.
-data ParserErrorBundle
+newtype ParserErrorBundle
     = ParseErrorB (ParseErrorBundle T.Text ParserError)
-    deriving stock (Show, Eq, Generic)
+    deriving stock (Eq, Generic)
     deriving anyclass (NFData)
+
+instance Show ParserErrorBundle where
+    show (ParseErrorB peb) = errorBundlePretty peb
 
 data Error uni fun ann
     = ParseErrorE ParserErrorBundle

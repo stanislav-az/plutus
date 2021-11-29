@@ -125,6 +125,8 @@ data Term tyname name uni fun a =
                         | Error a (Type tyname uni a)
                         | IWrap a (Type tyname uni a) (Type tyname uni a) (Term tyname name uni fun a)
                         | Unwrap a (Term tyname name uni fun a)
+                        | Constr a (Type tyname uni a) Int [Term tyname name uni fun a]
+                        | Case a (Type tyname uni a) (Term tyname name uni fun a) [Term tyname name uni fun a]
                         deriving stock (Functor, Show, Generic)
 
 type instance UniOf (Term tyname name uni fun ann) = uni
@@ -146,6 +148,9 @@ instance TermLike (Term tyname name uni fun) tyname name uni fun where
     unwrap   = Unwrap
     iWrap    = IWrap
     error    = Error
+    constr   = Constr
+    kase     = Case
+
     termLet x (Def vd bind) = Let x NonRec (pure $ TermBind x Strict vd bind)
     typeLet x (Def vd bind) = Let x NonRec (pure $ TypeBind x vd bind)
 
@@ -180,3 +185,5 @@ termAnn t = case t of
   Error a _      -> a
   IWrap a _ _ _  -> a
   Unwrap a _     -> a
+  Constr a _ _ _ -> a
+  Case a _ _ _   -> a
