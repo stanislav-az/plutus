@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveAnyClass     #-}
 {-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE OverloadedStrings  #-}
 {-|
@@ -5,18 +6,21 @@ Common types and functions used across all the ledger API modules.
 -}
 module Plutus.ApiCommon where
 
+import Codec.Serialise (Serialise)
 import Data.ByteString.Short
 import Data.Foldable (fold)
 import Data.Map qualified as Map
 import Data.Set qualified as Set
 import Data.Text
+import GHC.Generics (Generic)
 import PlutusCore as PLC
 import Prettyprinter
 
 -- | This represents the Cardano protocol version, with its major and minor components.
 -- This relies on careful understanding between us and the ledger as to what this means.
 data ProtocolVersion = ProtocolVersion { pvMajor :: Int, pvMinor :: Int }
-  deriving stock (Show, Eq)
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass Serialise
 
 instance Ord ProtocolVersion where
     compare (ProtocolVersion major minor) (ProtocolVersion major' minor') = compare major major' <> compare minor minor'

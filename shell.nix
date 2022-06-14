@@ -61,6 +61,7 @@ let
     jq
     nixFlakesAlias
     nixpkgs-fmt
+    pre-commit
     shellcheck
     stack
     yq
@@ -101,7 +102,7 @@ haskell.project.shellFor {
     ${utillinux}/bin/taskset -pc 0-1000 $$
   '';
 
-  # This is no longer set automatically as of more recent `haskell.nix` revisions, 
+  # This is no longer set automatically as of more recent `haskell.nix` revisions,
   # but is useful for users with LANG settings.
   LOCALE_ARCHIVE = lib.optionalString (stdenv.hostPlatform.libc == "glibc") "${glibcLocales}/lib/locale/locale-archive";
 }

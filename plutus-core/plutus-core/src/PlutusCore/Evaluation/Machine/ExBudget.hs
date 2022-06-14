@@ -147,6 +147,7 @@ where
 
 import PlutusPrelude hiding (toList)
 
+import Codec.Serialise (Serialise)
 import Data.Char (toLower)
 import Data.Semigroup
 import Deriving.Aeson
@@ -175,7 +176,7 @@ instance ExBudgetBuiltin fun () where
 
 data ExBudget = ExBudget { exBudgetCPU :: ExCPU, exBudgetMemory :: ExMemory }
     deriving stock (Eq, Show, Generic, Lift)
-    deriving anyclass (PrettyBy config, NFData)
+    deriving anyclass (PrettyBy config, NFData, Serialise)
     deriving (FromJSON, ToJSON) via CustomJSON '[FieldLabelModifier LowerIntialCharacter] ExBudget
     -- LowerIntialCharacter won't actually do anything here, but let's have it in case we change the field names.
 
