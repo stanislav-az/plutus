@@ -30,6 +30,7 @@ import Data.ByteString.Hash qualified as Hash
 import Data.ByteString.Lazy qualified as BS (toStrict)
 import Data.Char
 import Data.Ix
+import Data.Proxy
 import Data.Text (Text)
 import Data.Text.Encoding (decodeUtf8', encodeUtf8)
 import Flat hiding (from, to)
@@ -115,6 +116,8 @@ data DefaultFun
     | MkPairData
     | MkNilData
     | MkNilPairData
+    --
+    | DisplayConstant
     deriving stock (Show, Eq, Ord, Enum, Bounded, Generic, Ix)
     deriving anyclass (NFData, Hashable, PrettyBy PrettyConfigPlc)
 
@@ -1334,6 +1337,17 @@ instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFun where
             (\() -> [] @(Data,Data))
             (runCostingFunOneArgument . paramMkNilPairData)
     -- See Note [Inlining meanings of builtins].
+    toBuiltinMeaning DisplayConstant =
+        makeBuiltinMeaning
+            displayConstantPlc
+            mempty  -- TODO
+      where
+        displayConstantPlc :: Opaque val a -> Text
+        displayConstantPlc val = case asConstant val of
+            Left _                        -> "<not a constant>"
+            Right (Some (ValueOf uniA x)) -> bring (Proxy @PrettyConst) uniA $ displayConst x
+    -- See Note [Inlining meanings of builtins].
+
     {-# INLINE toBuiltinMeaning #-}
 
 -- It's set deliberately to give us "extra room" in the binary format to add things without running
@@ -1415,6 +1429,7 @@ instance Flat DefaultFun where
               MkNilData                       -> 49
               MkNilPairData                   -> 50
               SerialiseData                   -> 51
+              DisplayConstant                 -> 54
 
     decode = go =<< decodeBuiltin
         where go 0  = pure AddInteger
@@ -1471,6 +1486,7 @@ instance Flat DefaultFun where
               go 51 = pure SerialiseData
               go 52 = pure VerifyEcdsaSecp256k1Signature
               go 53 = pure VerifySchnorrSecp256k1Signature
+              go 54 = pure DisplayConstant
               go t  = fail $ "Failed to decode builtin tag, got: " ++ show t
 
     size _ n = n + builtinTagWidth
