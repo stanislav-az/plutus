@@ -2,9 +2,9 @@
 
 module Main (main) where
 
-import PlutusConformance.Common (evalUplcProg, runUplcEvalTests)
+import PlutusConformance.Common (TestGroup (..), evalUplcProg, runUplcEvalTests)
 import Prelude hiding (readFile)
 
 main :: IO ()
-main = runUplcEvalTests evalUplcProg
+main = runUplcEvalTests [MkTestGroup "CEK machine" evalUplcProg]
 

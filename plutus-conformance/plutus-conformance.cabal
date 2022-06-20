@@ -56,6 +56,7 @@ library
     , text
     , unliftio
 
+-- , plutus-metatheory
 executable add-test-output
   import:         lang
   type:           exitcode-stdio-1.0

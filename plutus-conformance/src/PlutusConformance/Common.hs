@@ -15,15 +15,16 @@ import PlutusCore.Evaluation.Machine.ExBudgetingDefaults (defaultCekParameters)
 import PlutusCore.Name (Name)
 import PlutusCore.Quote (runQuoteT)
 import PlutusPrelude
-import Test.Tasty (defaultMain, testGroup)
+import Test.Tasty (TestName, defaultMain, testGroup)
 import Test.Tasty.Golden (findByExtension)
 import Test.Tasty.HUnit (testCase, (@=?))
-import Test.Tasty.Providers
+import Test.Tasty.Providers (TestTree)
 import Text.Megaparsec (SourcePos)
 import UnliftIO.Exception
 import UntypedPlutusCore.Core.Type qualified as UPLC
 import UntypedPlutusCore.Evaluation.Machine.Cek (evaluateCekNoEmit)
 import UntypedPlutusCore.Parser qualified as UPLC
+-- import MAlonzo.Code.Main (runUAgda)
 
 -- Common functions for all tests
 
@@ -39,7 +40,8 @@ data TestContent =
    }
 
 {- | Create a list of `TestContent` with the given lists.
-The lengths of the input lists have to be the same, otherwise, an error occurs. -}
+The lengths of the input lists have to be the same, otherwise, an error occurs.
+Currently only works for .uplc files.-}
 mkTestContents ::
     [FilePath] -- ^ The list of paths of the input files.
     -> [T.Text] -- ^ The list of expected outputs.
@@ -56,6 +58,15 @@ mkTestContents lFilepaths lRes lProgs =
             , show (length lRes)
             , " Make sure all your input programs have an accompanying .expected file."
             ]
+
+{- | A test group to be run in a test suite. E.g., the UPLC evaluation test suite may have
+a test group of "Agda implementation" and a test group of
+"CEK machine".  -}
+data TestGroup a b =
+   MkTestGroup {
+       groupName :: TestName -- ^ The name of the test group.
+       , runner  :: a -> b -- ^ The runner used for the test group.
+   }
 
 {- | The default shown text when a parse error occurs.
 We don't want to show the detailed parse errors so that
@@ -85,6 +96,10 @@ evalUplcProg p =
         case eitherExceptionProg of
             Left _     -> Nothing
             Right prog -> Just prog
+
+-- | Runner for the Agda implementation.
+agdaEvalUplcProg :: UplcProg -> Maybe UplcProg
+agdaEvalUplcProg p = undefined
 
 {- | Run an input with the `runner` and return the result, in `Text`.
 When fail, the result is either the default text for parse error or evaluation failure. -}
@@ -119,7 +134,7 @@ mkUplcTestCase runner test =
 
 -- | Run the tests given a `runner` that evaluates UPLC programs.
 runUplcEvalTests ::
-    (UplcProg -> Maybe UplcProg)-- ^ The action to run the input through for the tests.
+    [TestGroup UplcProg (Maybe UplcProg)] -- ^ The action to run the input through for the tests.
     -> IO ()
 runUplcEvalTests runner = do
     inputFiles <- findByExtension [".uplc"] "uplc/evaluation/"
@@ -127,4 +142,4 @@ runUplcEvalTests runner = do
     lProgTxt <- for inputFiles T.readFile
     lEvaluatedRes <- for outputFiles T.readFile
     let testContents = mkTestContents inputFiles lEvaluatedRes lProgTxt
-    defaultMain $ testGroup "UPLC evaluation tests" $ fmap (mkUplcTestCase runner) testContents
+    defaultMain $ testGroup "UPLC evaluation tests" $ fmap (mkUplcTestCase evalUplcProg) testContents
