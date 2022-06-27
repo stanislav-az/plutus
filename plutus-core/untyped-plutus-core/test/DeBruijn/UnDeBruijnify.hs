@@ -4,7 +4,6 @@ module DeBruijn.UnDeBruijnify (test_undebruijnify) where
 import Control.Monad.Except
 import Control.Monad.State
 import DeBruijn.Common
-import PlutusCore (defaultVersion)
 import PlutusCore.Default
 import PlutusCore.Error
 import PlutusCore.MkPlc
@@ -150,10 +149,7 @@ test_undebruijnify = testNested "Golden"
     actGrace = prettyPlcClassicDebug . runExcept @(Error DefaultUni DefaultFun ())
                 . runQuoteT
                 . flip evalStateT mempty
-                . progTerm (unDeBruijnTermWith freeIndexAsConsistentLevel) . mkProg
-
-    mkProg = Program () (defaultVersion ()) . termMapNames fakeNameDeBruijn
-
+                . progTerm (unDeBruijnTermWith freeIndexAsConsistentLevel) . UPLC.mkProg . termMapNames fakeNameDeBruijn
 
 
 
