@@ -49,6 +49,7 @@ library
     , base
     , directory
     , filepath
+    , lens
     , megaparsec
     , plutus-core
     , tasty
@@ -57,7 +58,6 @@ library
 
 executable add-test-output
   import:         lang
-  type:           exitcode-stdio-1.0
   main-is:        Spec.hs
   hs-source-dirs: executables/add-test-output/
   other-modules:
@@ -72,7 +72,6 @@ executable add-test-output
 
 executable haskell-implementation
   import:         lang
-  type:           exitcode-stdio-1.0
   main-is:        Spec.hs
   hs-source-dirs: executables/haskell-implementation
   other-modules:
@@ -93,7 +92,6 @@ test-suite haskell-conformance
   other-modules:
   build-depends:
     , base                >=4.9 && <5
-    , lens
     , plutus-conformance
     , plutus-core
 
@@ -105,5 +103,8 @@ test-suite agda-conformance
   other-modules:
   build-depends:
     , base                >=4.9 && <5
+    , mtl
     , plutus-conformance
+    , plutus-core
     , plutus-metatheory
+    , transformers
