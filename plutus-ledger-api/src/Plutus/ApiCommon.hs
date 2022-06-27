@@ -23,6 +23,7 @@ import UntypedPlutusCore.Evaluation.Machine.Cek qualified as UPLC
 import Codec.CBOR.Decoding qualified as CBOR
 import Codec.CBOR.Extras
 import Codec.CBOR.Read qualified as CBOR
+import Codec.Serialise (Serialise)
 import Control.DeepSeq
 import Control.Monad.Except
 import Control.Monad.Writer
@@ -107,7 +108,8 @@ data LedgerPlutusVersion = PlutusV1
 -- | This represents the Cardano protocol version, with its major and minor components.
 -- This relies on careful understanding between us and the ledger as to what this means.
 data ProtocolVersion = ProtocolVersion { pvMajor :: Int, pvMinor :: Int }
-  deriving stock (Show, Eq)
+  deriving stock (Show, Eq, Generic)
+  deriving anyclass Serialise
 
 instance Ord ProtocolVersion where
     -- same as deriving Ord, just for having it explicitly
