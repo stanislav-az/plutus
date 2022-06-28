@@ -22,10 +22,12 @@ import PlutusPrelude
 import PlutusCore
 import PlutusCore.Subst
 
+import Control.Lens (coerced)
 import Control.Monad.Morph (hoist)
 import Control.Monad.Reader
 import Data.Set (Set)
 import Data.Set qualified as Set
+import Data.Set.Lens (setOf)
 import Hedgehog hiding (Size, Var)
 import Hedgehog.Internal.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
@@ -154,7 +156,7 @@ substAllNames ren =
 
 -- See Note [ScopeHandling].
 allTermNames :: Term TyName Name DefaultUni DefaultFun () -> Set Name
-allTermNames term = vTerm term <> Set.map coerce (tvTerm term)
+allTermNames = setOf (vTerm <^> tvTerm . coerced)
 
 -- See Note [Name mangling]
 mangleNames :: Term TyName Name DefaultUni DefaultFun () -> AstGen (Maybe (Term TyName Name DefaultUni DefaultFun ()))
