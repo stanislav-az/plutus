@@ -145,11 +145,11 @@ test_undebruijnify = testNested "Golden"
                       (\ (n,t) -> nestedGoldenVsDoc n $ actGrace t) <$> testsGrace
                     ]
   where
-    actThrow = prettyPlcClassicDebug . runExcept @(Error DefaultUni DefaultFun ()) . runQuoteT . progTerm unDeBruijnTerm . mkProg
+    actThrow = prettyPlcClassicDebug . runExcept @(Error DefaultUni DefaultFun ()) . runQuoteT . progTerm unDeBruijnTerm . mkDefaultProg
     actGrace = prettyPlcClassicDebug . runExcept @(Error DefaultUni DefaultFun ())
                 . runQuoteT
                 . flip evalStateT mempty
-                . progTerm (unDeBruijnTermWith freeIndexAsConsistentLevel) . UPLC.mkProg . termMapNames fakeNameDeBruijn
+                . progTerm (unDeBruijnTermWith freeIndexAsConsistentLevel) . UPLC.mkDefaultProg . termMapNames fakeNameDeBruijn
 
 
 
