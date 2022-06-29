@@ -31,6 +31,7 @@ module PlutusCore.Generators.PIR.GenerateTypes where
 
 import Control.Monad.Reader
 
+import Data.Bifunctor
 import Data.Map (Map)
 import Data.Map qualified as Map
 import Data.Set qualified as Set
@@ -43,7 +44,8 @@ import PlutusCore.Default
 import PlutusCore.Generators.PIR.Common
 import PlutusCore.Name
 import PlutusCore.Normalize
-import PlutusCore.Quote (runQuoteT)
+import PlutusCore.Pretty
+import PlutusCore.Quote (runQuote)
 import PlutusCore.TypeCheck.Internal (inferKindM, runTypeCheckM, withTyVar)
 import PlutusIR
 import PlutusIR.Error
@@ -332,21 +334,21 @@ shrinkKindAndType ctx (k, ty) =
     TyIFix{}          -> error "shrinkKindAndType: TyIFix"
 
 -- | Infer the kind of a type in a given kind context
-inferKind :: Map TyName (Kind ()) -> Type TyName DefaultUni () -> Maybe (Kind ())
-inferKind ctx ty = case runQuoteT $ runTypeCheckM () $
-                          foldr (uncurry withTyVar)
-                                (inferKindM @(Error DefaultUni DefaultFun ()) ty)
-                                (Map.toList ctx) of
-                      Left _  -> Nothing
-                      Right k -> Just k
+inferKind :: Map TyName (Kind ()) -> Type TyName DefaultUni () -> Either String (Kind ())
+inferKind ctx ty =
+    first display . runQuoteT . runTypeCheckM () $
+        foldr
+            (uncurry withTyVar)
+            (inferKindM @(Error DefaultUni DefaultFun ()) ty)
+            (Map.toList ctx)
 
 -- | Partial unsafeInferKind, useful for context where invariants are set up to guarantee
 -- that types are well-kinded.
 unsafeInferKind :: HasCallStack => Map TyName (Kind ()) -> Type TyName DefaultUni () -> Kind ()
 unsafeInferKind ctx ty =
   case inferKind ctx ty of
-    Nothing -> error "inferKind"
-    Just k  -> k
+    Left msg -> error msg
+    Right k  -> k
 
 -- | Shrink a type in a context assuming that it is of kind *.
 shrinkType :: HasCallStack
@@ -364,8 +366,18 @@ shrinkTypeAtKind :: HasCallStack
 shrinkTypeAtKind ctx k ty = [ ty' | (k', ty') <- shrinkKindAndType ctx (k, ty), k == k' ]
 
 -- | Check well-kindedness of a type in a context
-checkKind :: Map TyName (Kind ()) -> Type TyName DefaultUni () -> Kind () -> Bool
-checkKind ctx ty k = inferKind ctx ty == Just k
+checkKind :: Map TyName (Kind ()) -> Type TyName DefaultUni () -> Kind () -> Either String ()
+checkKind ctx ty kExp =
+    if kInf == Right kExp
+      then Right ()
+      else Left $ concat
+        [ "Inferred kind is "
+        , display kInf
+        , " while expected "
+        , display kExp
+        ]
+  where
+    kInf = inferKind ctx ty
 
 -- | Generate an arbitrary kind and closed type of that kind.
 genKindAndType :: Gen (Kind (), Type TyName DefaultUni ())
@@ -376,9 +388,7 @@ genKindAndType = do
 
 -- | Normalize a type, throw an error if normalization fails due to e.g. wellkindedness issues.
 normalizeTy :: Type TyName DefaultUni () -> Type TyName DefaultUni ()
-normalizeTy ty = case runQuoteT $ normalizeType ty of
-  Left _                 -> error "normalizeTy"
-  Right (Normalized ty') -> ty'
+normalizeTy = unNormalized . runQuote . normalizeType
 
 -- | Generate a context of free type variables with kinds
 genCtx :: Gen (Map TyName (Kind ()))
