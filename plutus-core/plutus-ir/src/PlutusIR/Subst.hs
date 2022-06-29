@@ -31,9 +31,9 @@ fvTerm = fvTermCtx mempty
 fvTermCtx :: Ord name => S.Set name -> Traversal' (Term tyname name uni fun ann) name
 fvTermCtx bound f = \case
     Let a r@NonRec bs tIn ->
-        let fvLinearScope bound' b = (bound' `union` setOf bindingNames b, fvBindingCtx bound' f b)
-            (bound'', bs') = mapAccumL fvLinearScope bound bs
-        in Let a r <$> sequenceA bs' <*> fvTermCtx bound'' f tIn
+        let fvLinearScope boundSoFar b = (boundSoFar `union` setOf bindingNames b, fvBindingCtx boundSoFar f b)
+            (boundAtTheEnd, bs') = mapAccumL fvLinearScope bound bs
+        in Let a r <$> sequenceA bs' <*> fvTermCtx boundAtTheEnd f tIn
     Let a r@Rec bs tIn ->
         let bound' = bound `union` setOf (traversed . bindingNames) bs
         in Let a r <$> traverse (fvBindingCtx bound f) bs <*> fvTermCtx bound' f tIn
