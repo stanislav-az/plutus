@@ -129,21 +129,21 @@ instance ( PLC.PrettyClassicBy configName tyname
 -- See note [Default pretty instances for PLC]
 instance (PLC.PrettyClassic tyname, Pretty ann) =>
     Pretty (TyVarDecl tyname ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug
 
 instance ( PLC.PrettyClassic tyname
          , PLC.PrettyClassic name
          , PLC.GShow uni, uni `PLC.Everywhere` PLC.PrettyConst
          , Pretty ann
          ) => Pretty (VarDecl tyname name uni fun ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug
 
 instance ( PLC.PrettyClassic tyname
          , PLC.PrettyClassic name
          , PLC.GShow uni, uni `PLC.Everywhere` PLC.PrettyConst
          , Pretty ann
          ) => Pretty (Datatype tyname name uni fun ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug
 
 instance ( PLC.PrettyClassic tyname
          , PLC.PrettyClassic name
@@ -151,7 +151,7 @@ instance ( PLC.PrettyClassic tyname
          , Pretty fun
          , Pretty ann
          ) => Pretty (Binding tyname name uni fun ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug
 
 instance ( PLC.PrettyClassic tyname
          , PLC.PrettyClassic name
@@ -159,7 +159,7 @@ instance ( PLC.PrettyClassic tyname
          , Pretty fun
          , Pretty ann
          ) => Pretty (Term tyname name uni fun ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug
 
 instance ( PLC.PrettyClassic tyname
          , PLC.PrettyClassic name
@@ -167,4 +167,4 @@ instance ( PLC.PrettyClassic tyname
          , Pretty fun
          , Pretty ann
          ) => Pretty (Program tyname name uni fun ann) where
-    pretty = PLC.prettyClassicDef
+    pretty = PLC.prettyClassicDebug

@@ -164,9 +164,9 @@ instance (GShow uni, Closed uni, uni `Everywhere` PrettyConst,  Pretty ann, Pret
             -- that `instance PrettyClassic PIR.Term` whereas `instance PrettyPLC PLC.Term`
             else " in term" <> hardline <> indent 2 (squotes (pretty t)) <> ".") <>
         hardline <>
-        "Expected type" <> hardline <> indent 2 (squotes (prettyBy config ty)) <>
+        "Expected type" <> hardline <> indent 2 (squotes (pretty ty)) <>
         "," <> hardline <>
-        "found type" <> hardline <> indent 2 (squotes (prettyBy config ty'))
+        "found type" <> hardline <> indent 2 (squotes (pretty ty'))
     prettyBy config (FreeTypeVariableE ann name)          =
         "Free type variable at " <+> pretty ann <+> ": " <+> prettyBy config name
     prettyBy config (FreeVariableE ann name)              =
