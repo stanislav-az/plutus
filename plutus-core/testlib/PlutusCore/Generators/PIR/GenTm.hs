@@ -74,6 +74,8 @@ data GenEnv = GenEnv
   , geCustomFreq         :: Int
   -- ^ How often do we use the custom generator -
   -- values in the range of 10-30 are usually reasonable.
+  , geDebug              :: Bool
+  -- ^ Are we currently running in debug-mode (to debug our generators)
   }
 
 {- Note [Recursion Control and geSize]
@@ -85,6 +87,10 @@ data GenEnv = GenEnv
    and keep track of the "recursion control size" separately from `Gen`s size in the `geSize`
    field of the `GenEnv` environment.
 -}
+
+-- | Run a generator in debug-mode.
+debug :: GenTm a -> GenTm a
+debug gen = local (\env -> env { geDebug = True }) gen
 
 -- | Run a `GenTm  generator in a top-level empty context where we are allowed to generate
 -- datatypes.
@@ -107,6 +113,7 @@ runGenTmCustom f cg g = sized $ \ n ->
                         , geEscaping           = YesEscape
                         , geCustomGen          = cg
                         , geCustomFreq         = f
+                        , geDebug              = False
                         }
 
 -- * Utility functions
