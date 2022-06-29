@@ -36,6 +36,22 @@ import Flat hiding (from, to)
 import Flat.Decoder
 import Flat.Encoder as Flat
 
+newtype DefaultFunV2 = DefaultFunV2 DefaultFun
+    deriving newtype (Eq, Ord, Ix, Enum, Bounded)
+newtype DefaultFunV1 = DefaultFunV1 DefaultFun
+    deriving newtype (ToBuiltinMeaning DefaultUni, Eq, Enum, Ix, Ord, Bounded)
+
+instance uni ~ DefaultUni => ToBuiltinMeaning uni DefaultFunV2 where
+    type CostingPart uni DefaultFunV2 = BuiltinCostModel
+    toBuiltinMeaning (DefaultFunV2 ConsByteString) =
+        makeBuiltinMeaning
+              (\(n :: Word8) xs -> BS.cons n xs)
+              (runCostingFunTwoArguments . paramConsByteString)
+    toBuiltinMeaning (DefaultFunV2 other) = toBuiltinMeaning (DefaultFunV1 other)
+    -- See Note [Inlining meanings of builtins].
+    {-# INLINE toBuiltinMeaning #-}
+
+
 -- See Note [Pattern matching on built-in types].
 -- TODO: should we have the commonest built-in functions at the front to have more compact encoding?
 -- | Default built-in functions.

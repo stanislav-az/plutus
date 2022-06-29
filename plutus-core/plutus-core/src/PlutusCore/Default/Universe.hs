@@ -36,6 +36,8 @@ import PlutusCore.Data
 import PlutusCore.Evaluation.Machine.Exception
 import PlutusCore.Evaluation.Result
 
+import Data.Bits (toIntegralSized)
+import Data.Word
 import Control.Applicative
 import Data.ByteString qualified as BS
 import Data.Int
@@ -290,6 +292,23 @@ instance HasConstantIn DefaultUni term => MakeKnownIn DefaultUni term Int where
 instance HasConstantIn DefaultUni term => ReadKnownIn DefaultUni term Int where
     readKnown term = intCastEq @Int64 @Int <$> readKnown term
     {-# INLINE readKnown #-}
+
+instance KnownTypeAst DefaultUni Word8 where
+    toTypeAst _ = toTypeAst $ Proxy @Word8
+
+-- See Note [Int/Word8 as Integer].
+instance HasConstantIn DefaultUni term => MakeKnownIn DefaultUni term Word8 where
+    makeKnown = makeKnown . toInteger
+    {-# INLINE makeKnown #-}
+
+instance HasConstantIn DefaultUni term => ReadKnownIn DefaultUni term Word8 where
+    readKnown term =
+        inline readKnownConstant term >>= oneShot \(i :: Integer) ->
+           case toIntegralSized i of
+               Just w8 -> pure w8
+               _       -> throwing_ _EvaluationFailure
+    {-# INLINE readKnown #-}
+
 
 {- Note [Stable encoding of tags]
 'encodeUni' and 'decodeUni' are used for serialisation and deserialisation of types from the
