@@ -91,6 +91,7 @@ import Prettyprinter.Extras
 import UntypedPlutusCore qualified as UPLC
 import UntypedPlutusCore.Check.Scope qualified as UPLC
 import UntypedPlutusCore.Evaluation.Machine.Cek qualified as UPLC
+import Debug.Trace (traceShow)
 
 -- | A script on the chain. This is an opaque type as far as the chain is concerned.
 newtype Script = Script { unScript :: UPLC.Program UPLC.DeBruijn PLC.DefaultUni PLC.DefaultFun () }
@@ -391,7 +392,7 @@ applyValidator
     -> Datum
     -> Redeemer
     -> Script
-applyValidator (Context (BuiltinData valData)) (Validator validator) (Datum (BuiltinData datum)) (Redeemer (BuiltinData redeemer)) =
+applyValidator (Context (BuiltinData valData)) (Validator validator) (Datum (BuiltinData datum)) (Redeemer (BuiltinData redeemer)) = traceShow valData $
     applyArguments validator [datum, redeemer, valData]
 
 -- | Evaluate a 'Validator' with its 'Context', 'Datum', and 'Redeemer', returning the log.
